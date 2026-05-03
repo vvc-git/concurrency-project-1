@@ -1,56 +1,54 @@
-# INE5410 - Trabalho 1 - 2021-1
+# INE5410 - Assignment 1 - 2021-1
 
-Este repositório contém o código base do T1 de INE510 do semestre 2021-1.
+This repository contains the base code for Assignment 1 of INE5410 from semester 2021-1.
 
-## Enunciado
+## Problem Statement
 
 ![WhatsApp Image 2024-07-23 at 11 36 30](https://github.com/user-attachments/assets/d08d1c41-eb7d-48ec-af32-d3254cf6cea9)
 
-## Solução
+## Solution
 
 # README
 
-## Sincronização de Vikings
+## Viking Synchronization
 
-### Tabela de Implementação
+### Implementation Table
 
-| Função/Componente            | Descrição                                                                                     |
+| Function/Component            | Description                                                                                     |
 |------------------------------|-----------------------------------------------------------------------------------------------|
-| **Buffer de Mesa**           | Utiliza um buffer (`buffer_mesa`) para representar a mesa. Cada posição pode ter três valores: |
-|                              | - `-1`: Espaço vazio                                                                          |
-|                              | - `0`: Viking normal                                                                          |
-|                              | - `1`: Viking berserker                                                                       |
-| **Mutexes**                  | Controlam o acesso ao buffer para garantir que múltiplos vikings não alterem o valor simultaneamente. |
-|                              | Impedem mudanças no buffer durante a verificação da disponibilidade do lugar.                 |
+| **Table Buffer**           | Uses a buffer (`buffer_mesa`) to represent the table. Each position can have three values: |
+|                              | - `-1`: Empty space                                                                          |
+|                              | - `0`: Normal Viking                                                                          |
+|                              | - `1`: Berserker Viking                                                                       |
+| **Mutexes**                  | Control access to the buffer to ensure multiple vikings don't modify the value simultaneously. |
+|                              | Prevent buffer changes during seat availability checking.                 |
 
-### Função `adquire_seats_plates`
+### Function `adquire_seats_plates`
 
-| Situação                     | Descrição                                                                                     |
+| Situation                     | Description                                                                                     |
 |------------------------------|-----------------------------------------------------------------------------------------------|
-| **Mesa com uma cadeira**     | - Trava o mutex na posição 0.                                                                 |
-|                              | - Verifica se a posição está vazia e a preenche com `1` ou `0`, conforme o tipo de viking.    |
-| **Mesa com várias cadeiras** | - Um laço tenta bloquear uma cadeira verificando `trylock(posicao_mesa) == 0`.                |
-|                              | - Chama a função auxiliar `posicao_disponivel` que retorna `1` se a posição é válida, ou `0` se não é. |
-|                              | - Se a posição é válida, o buffer é atualizado, e a função `pega_prato` é chamada para obter dois pratos. |
-|                              | - O mutex `controla_busca` é destravado, e a posição da cadeira é retornada.                 |
+| **Table with one chair**     | - Locks the mutex at position 0.                                                                 |
+|                              | - Checks if the position is empty and fills it with `1` or `0`, depending on the viking type.    |
+| **Table with multiple chairs** | - A loop attempts to lock a chair by checking `trylock(table_position) == 0`.                |
+|                              | - Calls the helper function `position_available` which returns `1` if the position is valid, or `0` if not. |
+|                              | - If the position is valid, the buffer is updated, and the `get_plate` function is called to obtain two plates. |
+|                              | - The mutex `search_control` is unlocked, and the chair position is returned.                 |
 
-### Espera pelo Término do Banquete
+### Waiting for Banquet to End
 
-| Componente                   | Descrição                                                                                     |
+| Component                   | Description                                                                                     |
 |------------------------------|-----------------------------------------------------------------------------------------------|
-| **Semáforo e Mutex**         | - `termina_comer`: Semáforo para esperar o fim do banquete.                                   |
-|                              | - `organ_comida`: Mutex para sincronizar o contador `soma_comidos`.                           |
-| **Contador**                 | - Inicia em zero e é incrementado toda vez que um viking libera o lugar.                      |
-|                              | - Verifica se todos os vikings terminaram de comer (`soma_comidos == horde_size`).            |
-|                              | - Libera o semáforo `termina_comer` com `2*horde_size` posts para permitir que todos os vikings façam suas preces. |
+| **Semaphore and Mutex**         | - `finish_eating`: Semaphore to wait for the end of the banquet.                                   |
+|                              | - `food_organizer`: Mutex to synchronize the `total_eaten` counter.                           |
+| **Counter**                 | - Starts at zero and is incremented every time a viking leaves their seat.                      |
+|                              | - Checks if all vikings have finished eating (`total_eaten == horde_size`).            |
+|                              | - Releases the `finish_eating` semaphore with `2*horde_size` posts to allow all vikings to make their prayers. |
 
-### Escolha de Deuses para as Preces
+### Choosing Gods for Prayers
 
-| Componente                   | Descrição                                                                                     |
+| Component                   | Description                                                                                     |
 |------------------------------|-----------------------------------------------------------------------------------------------|
-| **Semáforos**                | Usados para limitar o número de preces a cada deus, garantindo que deuses rivais não recebam um número desigual de preces. |
-| **Função `chieftain_get_god`** | - Gera um número aleatório para selecionar um deus.                                           |
-|                              | - Verifica se o semáforo do deus tem espaço (`sem_trywait(semaforo[num_rand]) == 0`).         |
-|                              | - Se sim, faz posts no semáforo do deus rival e nos semáforos dos super deuses (ODIN e THOR). |
-|                              | - Se não, gera um novo número e tenta novamente até encontrar um deus disponível.            |
-
+| **Semaphores**                | Used to limit the number of prayers to each god, ensuring rival gods don't receive an unequal number of prayers. |
+| **Function `chieftain_get_god`** | - Generates a random number to select a god.                                           |
+|                              | - Checks if the god's semaphore has available space (`sem_trywait(semaphore[num_rand]) == 0`).         |
+|                              | - If yes, pos
